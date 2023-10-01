@@ -146,7 +146,7 @@ public class ProjectAllocationServiceImpl implements ProjectAllocationService {
 		}
 		
 		for(Project p: getProjects) {
-			if(p.getMentor().getMentorId() == mentorId) {
+			if(p.getMentor().getMentorId() == mentor.getMentorId()) {
 				ProjectDTO project = new ProjectDTO();
 				project.setIdeaOwner(p.getIdeaOwner());
 				project.setProjectId(p.getProjectId());
