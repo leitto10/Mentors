@@ -40,7 +40,6 @@ public class ProjectAllocationServiceImpl implements ProjectAllocationService {
 		
 		Project project = new Project();
 		project.setIdeaOwner(projectDTO.getIdeaOwner());
-		project.setProjectId(projectDTO.getProjectId());
 		project.setProjectName(projectDTO.getProjectName());
 		project.setReleaseDate(projectDTO.getReleaseDate());
 		
@@ -49,6 +48,62 @@ public class ProjectAllocationServiceImpl implements ProjectAllocationService {
 		
 		return projectRepo.save(project).getProjectId();
 	}
+
+	
+	@Override
+	public List<MentorDTO> getMentors(Integer numberOfProjectsMentored) throws MentorException {
+		List<Mentor> getMentors = mentorRepo.findNumberOfProjectsMentored(numberOfProjectsMentored);
+		
+		if(getMentors.isEmpty()) {
+			throw new MentorException("Service.MENTOR_NOT_FOUND");
+		}
+		
+		List<MentorDTO> mentors = new ArrayList<>();
+		for(Mentor mentor: getMentors) {
+			MentorDTO mentorDTO = new MentorDTO();
+			mentorDTO.setMentorId(mentor.getMentorId());
+			mentorDTO.setMentorName(mentor.getMentorName());
+			mentorDTO.setNumberOfProjectsMentored(mentor.getNumberOfProjectsMentored());
+			
+			mentors.add(mentorDTO);
+		}
+		
+		return mentors;
+	}
+	
+	
+	@Override
+	public List<ProjectDTO> getAllProjects() throws MentorException {
+		List<Project> projects = (List<Project>) projectRepo.findAll();
+		
+		if(projects.isEmpty()) {
+			throw new MentorException("Service.PROJECT_NOT_FOUND");
+		}
+		
+		List<ProjectDTO> projectsDTO = new ArrayList<>();
+		for(Project project: projects) {
+			ProjectDTO projectDTO = new ProjectDTO();
+			projectDTO.setIdeaOwner(project.getIdeaOwner());
+			projectDTO.setProjectId(project.getProjectId());
+			projectDTO.setProjectName(project.getProjectName());
+			projectDTO.setReleaseDate(project.getReleaseDate());
+			
+			if(project.getMentor() != null) {
+				MentorDTO mentor = new MentorDTO();
+				mentor.setMentorId(project.getMentor().getMentorId());
+				mentor.setMentorName(project.getMentor().getMentorName());
+				mentor.setNumberOfProjectsMentored(project.getMentor().getNumberOfProjectsMentored());
+				
+				projectDTO.setMentorDTO(mentor);
+			}
+			
+			projectsDTO.add(projectDTO);
+		}
+		
+		
+		return projectsDTO;
+	}
+
 
 	@Override
 	public void updateProjectMentor(Integer projectId, Integer mentorId) throws MentorException {
@@ -59,7 +114,7 @@ public class ProjectAllocationServiceImpl implements ProjectAllocationService {
 			throw new MentorException("Service.CANNOT_ALLOCATE_PROJECT");
 		}
 		
-		Project project = projectRepo.findById(mentorId)
+		Project project = projectRepo.findById(projectId)
 				.orElseThrow(() -> new MentorException("Service.PROJECT_NOT_FOUND"));
 		
 		project.setMentor(mentor);
@@ -72,6 +127,7 @@ public class ProjectAllocationServiceImpl implements ProjectAllocationService {
 		Project project = projectRepo.findById(projectId)
 				.orElseThrow(() -> new MentorException("Service.PROJECT_NOT_FOUND"));
 		
+		
 		if(project.getMentor() != null) {
 			Mentor mentor = project.getMentor();
 			mentor.setNumberOfProjectsMentored(mentor.getNumberOfProjectsMentored() - 1);
@@ -81,82 +137,5 @@ public class ProjectAllocationServiceImpl implements ProjectAllocationService {
 		projectRepo.delete(project);
 	}
 
-	@Override
-	public List<MentorDTO> getMentors() throws MentorException {
-		List<MentorDTO> mentors = new ArrayList<>();
-		List<Mentor> getMentors = (List<Mentor>) mentorRepo.findAll();
-		
-		if(getMentors.isEmpty()) {
-			throw new MentorException("Service.MENTOR_NOT_FOUND");
-		}
-		
-		for(Mentor m: getMentors) {
-			MentorDTO mentor = new MentorDTO();
-			mentor.setMentorId(m.getMentorId());
-			mentor.setMentorName(m.getMentorName());
-			mentor.setNumberOfProjectsMentored(m.getNumberOfProjectsMentored());
-			mentors.add(mentor);
-		}
-		
-		return mentors;
-	}
-
-	@Override
-	public List<ProjectDTO> getAllProjects() throws MentorException {
-		List<ProjectDTO> projects = new ArrayList<>();
-		List<Project> getProjects = (List<Project>) projectRepo.findAll();
-		
-		if(getProjects.isEmpty()) {
-			throw new MentorException("Service.PROJECT_NOT_FOUND");
-		}
-		
-		for(Project p: getProjects) {
-			ProjectDTO project = new ProjectDTO();
-			project.setIdeaOwner(p.getIdeaOwner());
-			project.setProjectId(p.getProjectId());
-			project.setProjectName(p.getProjectName());
-			project.setReleaseDate(p.getReleaseDate());
-			
-			if(p.getMentor() != null) {
-				MentorDTO mentor = new MentorDTO();
-				mentor.setMentorId(p.getMentor().getMentorId());
-				mentor.setMentorName(p.getMentor().getMentorName());
-				mentor.setNumberOfProjectsMentored(p.getMentor().getNumberOfProjectsMentored());
-				
-				project.setMentorDTO(mentor);
-			}
-			
-			projects.add(project);
-		}
-		
-		return projects;
-	}
-
-	@Override
-	public List<ProjectDTO> getProjectsByMentorId(Integer mentorId) throws MentorException {
-		// WE NEED TO LOOK INTO THIS QUERY
-		List<ProjectDTO> projects = new ArrayList<>();
-		List<Project> getProjects = (List<Project>) projectRepo.findAll();
-		
-		Mentor mentor = mentorRepo.findById(mentorId)
-				.orElseThrow(() -> new MentorException("Service.MENTOR_NOT_FOUND"));
-		
-		if(getProjects.isEmpty()) {
-			throw new MentorException("Service.PROJECT_NOT_FOUND");
-		}
-		
-		for(Project p: getProjects) {
-			if(p.getMentor().getMentorId() == mentor.getMentorId()) {
-				ProjectDTO project = new ProjectDTO();
-				project.setIdeaOwner(p.getIdeaOwner());
-				project.setProjectId(p.getProjectId());
-				project.setProjectName(p.getProjectName());
-				project.setReleaseDate(p.getReleaseDate());
-				projects.add(project);
-			}
-		}
-		
-		return projects;
-	}
 
 }

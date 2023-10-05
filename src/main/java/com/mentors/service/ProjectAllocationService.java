@@ -8,17 +8,16 @@ import com.mentors.exception.MentorException;
 
 
 public interface ProjectAllocationService {
-	
-	public Integer allocateProject(ProjectDTO projectDTO) throws MentorException;
 
+	public Integer allocateProject(ProjectDTO projectAllocation) throws MentorException;
+
+	public List<MentorDTO> getMentors(Integer numberOfProjectsMentored) throws MentorException;
+	
+	public List<ProjectDTO> getAllProjects() throws MentorException;
+	
 	public void updateProjectMentor(Integer projectId, Integer mentorId) throws MentorException;
 	
 	public void deleteProject(Integer projectId) throws MentorException;
 
-	public List<MentorDTO> getMentors() throws MentorException;
-	
-	public List<ProjectDTO> getAllProjects() throws MentorException;
-
-	public List<ProjectDTO> getProjectsByMentorId(Integer mentorId) throws MentorException;
 
 }

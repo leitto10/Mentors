@@ -39,11 +39,13 @@ public class ProjectAllocationAPI {
 	@Autowired
 	private Environment enviroment;
 	
-	@GetMapping("/mentors")
-	public ResponseEntity<List<MentorDTO>> getMentors() throws MentorException {
-		List<MentorDTO> mentors = projectService.getMentors();
-		return new ResponseEntity<List<MentorDTO>>(mentors, HttpStatus.OK);
-	}
+    
+	@PostMapping("/project")
+    public ResponseEntity<String> allocateProject(@Valid @RequestBody ProjectDTO projectDTO) throws MentorException {
+		Integer projectId = projectService.allocateProject(projectDTO);
+		String message = enviroment.getProperty("API.ALLOCATION_SUCCESS");
+		return new ResponseEntity<String>(message + ": "+projectId, HttpStatus.CREATED);
+    }
 	
 	@GetMapping("/projects")
 	public ResponseEntity<List<ProjectDTO>> getProjects() throws MentorException {
@@ -51,37 +53,29 @@ public class ProjectAllocationAPI {
 		return new ResponseEntity<List<ProjectDTO>>(projects, HttpStatus.OK);
 	}
 
-	@GetMapping("/projects/{mentorId}")
-	public ResponseEntity<List<ProjectDTO>> getProjectsById(@PathVariable Integer mentorId) throws  MentorException {
-		List<ProjectDTO> projects = projectService.getProjectsByMentorId(mentorId);
-		return new ResponseEntity<>(projects, HttpStatus.OK);
-	}
-	
-	@PostMapping("/project")
-	public ResponseEntity<String> allocatePoject(@Valid @RequestBody ProjectDTO projectDTO) throws MentorException {
-		Integer projectId = projectService.allocateProject(projectDTO);
-		String message = enviroment.getProperty("API.ALLOCATION_SUCCESS");
-		return new ResponseEntity<String>(message + ": "+projectId, HttpStatus.CREATED);
-	}
-	
-	@PutMapping("/project/{projectId}/{mentorId}")
-	public ResponseEntity<String> updateProjectMentor(@PathVariable Integer projectId,
-			@PathVariable
-			@Min(value=1000, message="{mentor.mentorid.invalid}")
-			@Max(value=9999, message="{mentor.mentorid.invalid}")
-			Integer mentorId) throws MentorException {
-		
+	@GetMapping("mentor/{numberOfProjectsMentored}")
+    public ResponseEntity<List<MentorDTO>> getMentors(@PathVariable Integer numberOfProjectsMentored) throws MentorException {
+		List<MentorDTO> mentors = projectService.getMentors(numberOfProjectsMentored);
+		return new ResponseEntity<List<MentorDTO>>(mentors, HttpStatus.OK);
+    }
+
+	@PutMapping("project/{projectId}/{mentorId}") 
+    public ResponseEntity<String> updateProjectMentor(@PathVariable Integer projectId,
+    		@PathVariable
+    		@Min(value=1000, message="{mentor.mentorid.invalid}")
+    		@Max(value=9999, message="{mentor.mentorid.invalid}")
+    		Integer mentorId) throws MentorException {
 		projectService.updateProjectMentor(projectId, mentorId);
-		String message =  enviroment.getProperty("API.PROJECT_UPDATE_SUCCESS");
+		String message = enviroment.getProperty("API.PROJECT_UPDATE_SUCCESS");
 		return new ResponseEntity<String>(message, HttpStatus.OK);
-	}
-	
-	@DeleteMapping("/project/{projectId}")
-	public ResponseEntity<String> deleteProject(@PathVariable Integer projectId) throws MentorException {
+    }
+
+	@DeleteMapping("project/{projectId}")
+    public ResponseEntity<String> deleteProject(@PathVariable Integer projectId) throws MentorException {
 		projectService.deleteProject(projectId);
 		String message = enviroment.getProperty("API.PROJECT_DELETE_SUCCESS");
-		return new ResponseEntity<String>(message, HttpStatus.OK);
-	}
+	return new ResponseEntity<String>(message, HttpStatus.OK);
+    }
 	
 }
 
