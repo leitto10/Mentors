@@ -21,10 +21,8 @@ import jakarta.transaction.Transactional;
 @Service("projectService")
 public class ProjectAllocationServiceImpl implements ProjectAllocationService {
 	
-	
 	@Autowired
 	private MentorRepository mentorRepo;
-	
 	@Autowired
 	private ProjectRepository projectRepo;
 	
@@ -47,6 +45,19 @@ public class ProjectAllocationServiceImpl implements ProjectAllocationService {
 		project.setMentor(mentor);
 		
 		return projectRepo.save(project).getProjectId();
+	}
+	
+	@Override
+	public MentorDTO getMentor(Integer mentorId) throws MentorException {
+		Mentor mentor = mentorRepo.findById(mentorId)
+				.orElseThrow(() -> new MentorException("Service.MENTOR_NOT_FOUND"));
+		
+		MentorDTO mentorDTO = new MentorDTO();
+		mentorDTO.setMentorId(mentor.getMentorId());
+		mentorDTO.setMentorName(mentor.getMentorName());
+		mentorDTO.setNumberOfProjectsMentored(mentor.getNumberOfProjectsMentored());
+		
+		return mentorDTO;
 	}
 
 	
@@ -88,14 +99,14 @@ public class ProjectAllocationServiceImpl implements ProjectAllocationService {
 			projectDTO.setProjectName(project.getProjectName());
 			projectDTO.setReleaseDate(project.getReleaseDate());
 			
-			if(project.getMentor() != null) {
-				MentorDTO mentor = new MentorDTO();
-				mentor.setMentorId(project.getMentor().getMentorId());
-				mentor.setMentorName(project.getMentor().getMentorName());
-				mentor.setNumberOfProjectsMentored(project.getMentor().getNumberOfProjectsMentored());
-				
-				projectDTO.setMentorDTO(mentor);
-			}
+//			if(project.getMentor() != null) {
+//				MentorDTO mentor = new MentorDTO();
+//				mentor.setMentorId(project.getMentor().getMentorId());
+//				mentor.setMentorName(project.getMentor().getMentorName());
+//				mentor.setNumberOfProjectsMentored(project.getMentor().getNumberOfProjectsMentored());
+//				
+//				projectDTO.setMentorDTO(mentor);
+//			}
 			
 			projectsDTO.add(projectDTO);
 		}

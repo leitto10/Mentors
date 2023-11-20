@@ -15,6 +15,8 @@ public interface ProjectAllocationService {
 	
 	public List<ProjectDTO> getAllProjects() throws MentorException;
 	
+	public MentorDTO getMentor(Integer mentorId) throws MentorException;
+	
 	public void updateProjectMentor(Integer projectId, Integer mentorId) throws MentorException;
 	
 	public void deleteProject(Integer projectId) throws MentorException;

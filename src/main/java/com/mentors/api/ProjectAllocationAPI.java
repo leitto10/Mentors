@@ -39,21 +39,26 @@ public class ProjectAllocationAPI {
 	@Autowired
 	private Environment enviroment;
 	
+	
+	@GetMapping("mentor/{mentorId}")
+	public ResponseEntity<MentorDTO> getMentor(@PathVariable Integer mentorId) throws MentorException {
+		return new ResponseEntity<MentorDTO>(projectService.getMentor(mentorId), HttpStatus.OK);
+	}
     
-	@PostMapping("/project")
+	@PostMapping("project")
     public ResponseEntity<String> allocateProject(@Valid @RequestBody ProjectDTO projectDTO) throws MentorException {
 		Integer projectId = projectService.allocateProject(projectDTO);
 		String message = enviroment.getProperty("API.ALLOCATION_SUCCESS");
 		return new ResponseEntity<String>(message + ": "+projectId, HttpStatus.CREATED);
     }
 	
-	@GetMapping("/projects")
+	@GetMapping("projects")
 	public ResponseEntity<List<ProjectDTO>> getProjects() throws MentorException {
 		List<ProjectDTO> projects = projectService.getAllProjects();
 		return new ResponseEntity<List<ProjectDTO>>(projects, HttpStatus.OK);
 	}
 
-	@GetMapping("mentor/{numberOfProjectsMentored}")
+	@GetMapping("mentors/{numberOfProjectsMentored}")
     public ResponseEntity<List<MentorDTO>> getMentors(@PathVariable Integer numberOfProjectsMentored) throws MentorException {
 		List<MentorDTO> mentors = projectService.getMentors(numberOfProjectsMentored);
 		return new ResponseEntity<List<MentorDTO>>(mentors, HttpStatus.OK);
